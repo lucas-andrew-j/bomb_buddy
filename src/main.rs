@@ -5,18 +5,20 @@ fn main() {
 
     loop {
         println!("What kind of puzzle?");
-        println!("1: Button");
-        println!("2: Password");
-        println!("3: Complicated Wires");
-
+        println!("1: Wires");
+        println!("2: Button");
+        println!("3: Password");
+        println!("4: Complicated Wires");
+        println!();
         let Ok(_) = io::stdin().read_line(&mut input) else { return };
 
         println!();
 
         match input.as_str().trim() {
-            "1" => process_button(),
-            "2" => process_password(),
-            "3" => process_complicated_wires(),
+            "1" => process_wires(),
+            "2" => process_button(),
+            "3" => process_password(),
+            "4" => process_complicated_wires(),
             _ => {
                 println!("Invalid entry");
                 println!();
@@ -57,6 +59,7 @@ fn process_button() {
     } else {
         press_and_hold();
     }
+    println!();
 }
 
 fn get_color() -> Result<String, String> {
@@ -154,7 +157,6 @@ fn press_and_hold() {
     println!("Blue:\tRelease on 4");
     println!("Yellow:\tRelease on 5");
     println!("Other:\tRelease on 1");
-    println!();
 }
 
 fn process_password() {
@@ -169,7 +171,6 @@ fn process_password() {
     let mut column = 1;
     let mut possible_words = Vec::new();
 
-    //loop to add columns
     loop {
         println!("Put in the letters for column {}: ", column);
 
@@ -180,10 +181,8 @@ fn process_password() {
         }
 
         println!();
-        //loop to remove all possibilities from words vec if they do not match a letter in the column
 
         for word in words.iter() {
-            //add all words that are compatible to the list of possible words
             for ch in column_letters.to_lowercase().chars() {
                 if ch == word.chars().nth(column - 1).unwrap() {
                     possible_words.push(*word);
@@ -191,11 +190,9 @@ fn process_password() {
             }
         }
 
-        //reduce the list of words to just the words that are possible.
         words = possible_words.clone();
         possible_words = Vec::new();
 
-        //print the list of possible words
         for word in words.iter() {
             println!("{}", word);
         }
@@ -259,21 +256,16 @@ fn process_complicated_wires() {
         }
     }
 
-    //see if we need to get any additional information
     let mut answer = String::new();
     if all_results.contains("S") {
-        //last digit of serial number even?
         println!("Is the last digit of the serial number even? (1 for yes, 2 for no): ");
+        let answer = serial_is_even();
 
-        match io::stdin().read_line(&mut answer) {
-            Ok(_) => (),
-            Err(_) => return //Err("Failure when retrieving input".to_owned()),
-        }
         println!();
 
-        if answer.trim() == "1" {
+        if let Ok(true) = answer {
             all_results = all_results.replace("S", "C");
-        } else if answer.trim() == "2" {
+        } else if let Ok(false) = answer {
             all_results = all_results.replace("S", "D");
         } else {
             all_results = all_results.replace("S", "?");
@@ -281,7 +273,6 @@ fn process_complicated_wires() {
     }
 
     if all_results.contains("P") {
-        //does the bomb have a parallel port?
         println!("Is there a parallel port? (1 for yes, 2 for no): ");
 
         match io::stdin().read_line(&mut answer) {
@@ -319,4 +310,114 @@ fn process_complicated_wires() {
 
     println!("Results: {}", all_results);
     println!();
+}
+
+
+fn process_wires() {
+    println!("Enter the first letter for each wire in order (but 'u' for blue and 'a' for black)");
+
+    let mut wires = String::new();
+    match io::stdin().read_line(&mut wires) {
+        Ok(_) => (),
+        Err(_) => return
+    }
+    println!();
+
+    wires = wires.trim().to_lowercase();
+    let result = match wires.len() {
+        3 => { three_wires(wires) },
+        4 => { four_wires(wires) },
+        5  => { five_wires(wires) },
+        6 => { six_wires(wires) },
+        _ => { return },
+    };
+
+    if let Ok(x) = result {
+        println!("Result: {}", x);
+    } else {
+        println!("Error when interpreting input.");
+    }
+    
+    println!();
+}
+
+fn three_wires(wires: String) -> Result<usize, String> {
+    if !wires.contains("r") {
+        Ok(2)
+    } else if wires.chars().nth(3) == Some('w') {
+        Ok(3)
+    } else if wires.chars().filter(|wires| *wires == 'u').count() == 2 {
+        Ok(wires.rfind('u').unwrap() + 1)
+    } else {
+        Ok(3)
+    }
+}
+
+fn four_wires(wires: String) -> Result<usize, String> {
+    if wires.chars().filter(|wires| *wires == 'u').count() > 2 && Ok(true) == serial_is_even() {
+        Ok(wires.rfind('r').unwrap() + 1)
+    } else if wires.chars().nth(3) == Some('y') && !wires.to_lowercase().contains("r") {
+        Ok(1)
+    } else if wires.chars().filter(|wires| *wires == 'u').count() == 1 {
+        Ok(1)
+    } else if wires.chars().filter(|wires| *wires == 'u').count() > 1 {
+        Ok(4)
+    } else {
+        Ok(2)
+    }
+}
+
+fn five_wires(wires: String) -> Result<usize, String> {
+    if wires.chars().nth(4) == Some('a') {
+        let even_serial = serial_is_even();
+        if Ok(false) == even_serial {
+            return Ok(4);
+        } else if let Err(x) = even_serial {
+            return Err(x);
+        }
+    }
+    
+    if wires.chars().filter(|wires| *wires == 'r').count() == 1 && wires.chars().filter(|wires| *wires == 'y').count() > 1 {
+        Ok(1)
+    } else if wires.chars().filter(|wires| *wires == 'a').count() == 0 {
+        Ok(2)
+    } else {
+        Ok(1)
+    }
+}
+
+fn six_wires(wires: String) -> Result<usize, String> {
+    if !wires.to_lowercase().contains("y") {
+        let even_serial = serial_is_even();
+        if Ok(false) == even_serial {
+            return Ok(3);
+        } else if let Err(x) = even_serial {
+            return Err(x);
+        }
+    }
+
+    if wires.chars().filter(|wires| *wires == 'y').count() == 1 && wires.chars().filter(|wires| *wires == 'w').count() > 1 {
+        Ok(4)
+    } else if wires.chars().filter(|wires| *wires == 'r').count() == 0 {
+        Ok(6)
+    } else {
+        Ok(4)
+    }
+}
+
+fn serial_is_even() -> Result<bool, String> {
+    println!("Is the last digit of the serial number even? (1 for yes, 2 for no): ");
+    
+    let mut answer = String::new();
+    match io::stdin().read_line(&mut answer) {
+        Ok(_) => (),
+        Err(_) => return Err("Input failed.".to_owned()),
+    }
+    println!();
+
+    if answer.trim() == "1" {
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
