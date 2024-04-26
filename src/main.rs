@@ -211,67 +211,50 @@ fn process_password() {
 
 fn process_complicated_wires() {
     let mut all_results = String::new();
-    let mut wires = 0;
+    let mut num_wires = 0;
 
     loop {
-        println!("Put in the status of an LED (1 for on, 2 for off): ");
+        println!("Enter the info for a wire as one continuous string. Enter 'q' or blank to quit.");
+        println!("y/n for the LED, first letters of colors, and y/n for a star.");
 
-        let mut led = String::new();
-        match io::stdin().read_line(&mut led) {
+        let mut wire = String::new();
+        match io::stdin().read_line(&mut wire) {
             Ok(_) => (),
             Err(_) => return //Err("Failure when retrieving input".to_owned()),
         }
         println!();
 
-        if led.trim().contains("q") {
+        if wire.trim().contains("q") || wire.trim().len() == 0 {
             break;
         }
 
-        println!("Put in the color(s) of the wires (r for red, b for blue): ");
-
-        let mut colors = String::new();
-        match io::stdin().read_line(&mut colors) {
-            Ok(_) => (),
-            Err(_) => return //Err("Failure when retrieving input".to_owned()),
-        }
-        println!();
-
-        println!("Does the wire have a star? (1 for yes, 2 for no): ");
-
-        let mut star = String::new();
-        match io::stdin().read_line(&mut star) {
-            Ok(_) => (),
-            Err(_) => return //Err("Failure when retrieving input".to_owned()),
-        }
-        println!();
-
-        let result = match (led.trim(),
-                                colors.to_lowercase().contains("r"),
-                                colors.to_lowercase().contains("b"),
-                                star.trim()) {
-            ("1", true, true, "1") => { "D" },
-            ("1", true, true, "2") => { "S" },
-            ("1", true, false, "1") => { "B" },
-            ("1", true, false, "2") => { "B" },
-            ("1", false, true, "1") => { "P" },
-            ("1", false, true, "2") => { "P" },
-            ("1", false, false, "1") => { "B" },
-            ("1", false, false, "2") => { "D" },
-            ("2", true, true, "1") => { "P" },
-            ("2", true, true, "2") => { "S" },
-            ("2", true, false, "1") => { "C" },
-            ("2", true, false, "2") => { "S" },
-            ("2", false, true, "1") => { "D" },
-            ("2", false, true, "2") => { "S" },
-            ("2", false, false, "1") => { "C" },
-            ("2", false, false, "2") => { "C" },
+        let result = match (wire.trim().chars().nth(0).unwrap(),
+                            wire.to_lowercase().contains("r"),
+                            wire.to_lowercase().contains("b"),
+                            wire.trim().chars().last().unwrap()) {
+            ('y', true, true, 'y') => { "D" },
+            ('y', true, true, 'n') => { "S" },
+            ('y', true, false, 'y') => { "B" },
+            ('y', true, false, 'n') => { "B" },
+            ('y', false, true, 'y') => { "P" },
+            ('y', false, true, 'n') => { "P" },
+            ('y', false, false, 'y') => { "B" },
+            ('y', false, false, 'n') => { "D" },
+            ('n', true, true, 'y') => { "P" },
+            ('n', true, true, 'n') => { "S" },
+            ('n', true, false, 'y') => { "C" },
+            ('n', true, false, 'n') => { "S" },
+            ('n', false, true, 'y') => { "D" },
+            ('n', false, true, 'n') => { "S" },
+            ('n', false, false, 'y') => { "C" },
+            ('n', false, false, 'n') => { "C" },
             _ => "?",
         };
 
         all_results.push_str(result);
 
-        wires += 1;
-        if wires >= 6 {
+        num_wires += 1;
+        if num_wires >= 6 {
             break;
         }
     }
@@ -317,7 +300,6 @@ fn process_complicated_wires() {
     }
 
     if all_results.contains("B") {
-        //does the bomb have two or more batteries?
         println!("Does the bomb have two or more batteries? (1 for yes, 2 for no): ");
 
         match io::stdin().read_line(&mut answer) {
@@ -335,6 +317,6 @@ fn process_complicated_wires() {
         }
     }
 
-    println!("{}", all_results);
+    println!("Results: {}", all_results);
     println!();
 }
