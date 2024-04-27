@@ -210,10 +210,10 @@ fn process_complicated_wires() {
     let mut all_results = String::new();
     let mut num_wires = 0;
 
-    loop {
-        println!("Enter the info for a wire as one continuous string. Enter 'q' or blank to quit.");
-        println!("y/n for the LED, first letters of colors, and y/n for a star.");
+    println!("Enter the info for a wire as one continuous string. Enter 'q' or blank to quit.");
+    println!("y for an LED, first letters of colors, and y for a star.");
 
+    loop {
         let mut wire = String::new();
         match io::stdin().read_line(&mut wire) {
             Ok(_) => (),
@@ -230,22 +230,21 @@ fn process_complicated_wires() {
                             wire.to_lowercase().contains("b"),
                             wire.trim().chars().last().unwrap()) {
             ('y', true, true, 'y') => { "D" },
-            ('y', true, true, 'n') => { "S" },
+            ('y', true, true, _) => { "S" },
             ('y', true, false, 'y') => { "B" },
-            ('y', true, false, 'n') => { "B" },
+            ('y', true, false, _) => { "B" },
             ('y', false, true, 'y') => { "P" },
-            ('y', false, true, 'n') => { "P" },
+            ('y', false, true, _) => { "P" },
             ('y', false, false, 'y') => { "B" },
-            ('y', false, false, 'n') => { "D" },
-            ('n', true, true, 'y') => { "P" },
-            ('n', true, true, 'n') => { "S" },
-            ('n', true, false, 'y') => { "C" },
-            ('n', true, false, 'n') => { "S" },
-            ('n', false, true, 'y') => { "D" },
-            ('n', false, true, 'n') => { "S" },
-            ('n', false, false, 'y') => { "C" },
-            ('n', false, false, 'n') => { "C" },
-            _ => "?",
+            ('y', false, false, _) => { "D" },
+            (_, true, true, 'y') => { "P" },
+            (_, true, true, _) => { "S" },
+            (_, true, false, 'y') => { "C" },
+            (_, true, false, _) => { "S" },
+            (_, false, true, 'y') => { "D" },
+            (_, false, true, _) => { "S" },
+            (_, false, false, 'y') => { "C" },
+            (_, false, false, _) => { "C" },
         };
 
         all_results.push_str(result);
@@ -254,14 +253,13 @@ fn process_complicated_wires() {
         if num_wires >= 6 {
             break;
         }
+
+        println!("Next wire ('q' or blank to quit.): ");
     }
 
     let mut answer = String::new();
     if all_results.contains("S") {
-        println!("Is the last digit of the serial number even? (1 for yes, 2 for no): ");
         let answer = serial_is_even();
-
-        println!();
 
         if let Ok(true) = answer {
             all_results = all_results.replace("S", "C");
@@ -273,7 +271,7 @@ fn process_complicated_wires() {
     }
 
     if all_results.contains("P") {
-        println!("Is there a parallel port? (1 for yes, 2 for no): ");
+        println!("Is there a parallel port? (y/n): ");
 
         match io::stdin().read_line(&mut answer) {
             Ok(_) => (),
@@ -281,17 +279,19 @@ fn process_complicated_wires() {
         }
         println!();
 
-        if answer.trim() == "1" {
+        if answer.trim() == "y" {
             all_results = all_results.replace("P", "C");
-        } else if answer.trim() == "2" {
+        } else if answer.trim() == "n" {
             all_results = all_results.replace("P", "D");
         } else {
             all_results = all_results.replace("P", "?");
         }
+
+        answer.clear();
     }
 
     if all_results.contains("B") {
-        println!("Does the bomb have two or more batteries? (1 for yes, 2 for no): ");
+        println!("Does the bomb have two or more batteries? (y/n): ");
 
         match io::stdin().read_line(&mut answer) {
             Ok(_) => (),
@@ -299,9 +299,9 @@ fn process_complicated_wires() {
         }
         println!();
 
-        if answer.trim() == "1" {
+        if answer.trim() == "y" {
             all_results = all_results.replace("B", "C");
-        } else if answer.trim() == "2" {
+        } else if answer.trim() == "n" {
             all_results = all_results.replace("B", "D");
         } else {
             all_results = all_results.replace("B", "?");
@@ -406,7 +406,7 @@ fn six_wires(wires: String) -> Result<usize, String> {
 }
 
 fn serial_is_even() -> Result<bool, String> {
-    println!("Is the last digit of the serial number even? (1 for yes, 2 for no): ");
+    println!("Is the last digit of the serial number even? (y/n): ");
     
     let mut answer = String::new();
     match io::stdin().read_line(&mut answer) {
@@ -415,7 +415,7 @@ fn serial_is_even() -> Result<bool, String> {
     }
     println!();
 
-    if answer.trim() == "1" {
+    if answer.trim() == "y" {
         Ok(true)
     } else {
         Ok(false)
