@@ -7,8 +7,9 @@ fn main() {
         println!("What kind of puzzle?");
         println!("1: Wires");
         println!("2: Button");
-        println!("3: Password");
+        println!("3: Memory");
         println!("4: Complicated Wires");
+        println!("5: Password");
         println!();
         let Ok(_) = io::stdin().read_line(&mut input) else { return };
 
@@ -17,8 +18,9 @@ fn main() {
         match input.as_str().trim() {
             "1" => process_wires(),
             "2" => process_button(),
-            "3" => process_password(),
+            "3" => process_memory(),
             "4" => process_complicated_wires(),
+            "5" => process_password(),
             _ => {
                 println!("Invalid entry");
                 println!();
@@ -419,5 +421,108 @@ fn serial_is_even() -> Result<bool, String> {
         Ok(true)
     } else {
         Ok(false)
+    }
+}
+
+struct MemoryStage {
+    position: u8,
+    label: u8,
+}
+
+fn process_memory() {
+    let mut stage = 1;
+    let mut mem = Vec::new();
+
+    loop {
+        let mut position: u8 = 0;
+        let mut label: u8 = 0;
+
+        println!("Enter the number on the display :");
+
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => (),
+            Err(_) => return
+        }
+        println!();
+
+        match (stage, input.trim()) {
+            (1, "3") => position = 3,
+            (1, "4") => position = 4,
+            (1, _) => position = 2,
+
+            (2, "1") => label = 4,
+            (2, "3") => position = 1,
+            (2, _) => position = position_from_stage(mem.get(0)),
+
+            (3, "1") => label = label_from_stage(mem.get(1)),
+            (3, "2") => label = label_from_stage(mem.get(0)),
+            (3, "3") => position = 3,
+            (3, "4") => label = 4,
+
+            (4, "1") => position = position_from_stage(mem.get(0)),
+            (4, "2") => position = 1,
+            (4, _) => position = position_from_stage(mem.get(1)),
+
+            (5, "1") => label = label_from_stage(mem.get(0)),
+            (5, "2") => label = label_from_stage(mem.get(1)),
+            (5, "3") => label = label_from_stage(mem.get(3)),
+            (5, "4") => label = label_from_stage(mem.get(2)),
+            _ => return,
+        }
+
+        match (position, label) {
+            (1..=4, 0) => {
+                println!("Select position {}. What is the label?", position);
+            },
+            (0, 1..=4) => {
+                println!("Select label {}. What is the position?", label);
+            },
+            _ => return,
+        }
+
+        if stage == 5 {
+            break;
+        }
+
+        input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => (),
+            Err(_) => return
+        }
+
+        let input = match input.trim().parse::<u8>() {
+            Ok(x) => x,
+            _ => 0,
+        };
+
+        println!();
+
+        match (position, label) {
+            (1..=4, 0) => label = input,
+            (0, 1..=4) => position = input,
+            _ => (),
+        }
+
+        mem.push(MemoryStage{ position, label });
+        stage += 1;
+    }
+
+    println!();
+}
+
+fn position_from_stage(memory: Option<&MemoryStage>) -> u8 {
+    if let Some(stage) = memory {
+        stage.position
+    } else {
+        0
+    }
+}
+
+fn label_from_stage(memory: Option<&MemoryStage>) -> u8 {
+    if let Some(stage) = memory {
+        stage.label
+    } else {
+        0
     }
 }
