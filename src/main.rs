@@ -1,4 +1,5 @@
 use std::io;
+use std::collections::HashMap;
 
 fn main() {
     let mut input = String::new();
@@ -7,9 +8,10 @@ fn main() {
         println!("What kind of puzzle?");
         println!("1: Wires");
         println!("2: Button");
-        println!("3: Memory");
-        println!("4: Complicated Wires");
-        println!("5: Password");
+        println!("3: Keypad");
+        println!("4: Memory");
+        println!("5: Complicated Wires");
+        println!("6: Password");
         println!();
         let Ok(_) = io::stdin().read_line(&mut input) else { return };
 
@@ -18,9 +20,10 @@ fn main() {
         match input.as_str().trim() {
             "1" => process_wires(),
             "2" => process_button(),
-            "3" => process_memory(),
-            "4" => process_complicated_wires(),
-            "5" => process_password(),
+            "3" => process_keypad(),
+            "4" => process_memory(),
+            "5" => process_complicated_wires(),
+            "6" => process_password(),
             _ => {
                 println!("Invalid entry");
                 println!();
@@ -329,7 +332,7 @@ fn process_wires() {
     let result = match wires.len() {
         3 => { three_wires(wires) },
         4 => { four_wires(wires) },
-        5  => { five_wires(wires) },
+        5 => { five_wires(wires) },
         6 => { six_wires(wires) },
         _ => { return },
     };
@@ -356,7 +359,7 @@ fn three_wires(wires: String) -> Result<usize, String> {
 }
 
 fn four_wires(wires: String) -> Result<usize, String> {
-    if wires.chars().filter(|wires| *wires == 'u').count() > 2 && Ok(true) == serial_is_even() {
+    if wires.chars().filter(|wires| *wires == 'r').count() > 1 && Ok(false) == serial_is_even() {
         Ok(wires.rfind('r').unwrap() + 1)
     } else if wires.chars().nth(3) == Some('y') && !wires.to_lowercase().contains("r") {
         Ok(1)
@@ -437,7 +440,7 @@ fn process_memory() {
         let mut position: u8 = 0;
         let mut label: u8 = 0;
 
-        println!("Enter the number on the display :");
+        println!("Enter the number on the display:");
 
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
@@ -525,4 +528,125 @@ fn label_from_stage(memory: Option<&MemoryStage>) -> u8 {
     } else {
         0
     }
+}
+
+fn process_keypad() {
+    let char_map = get_bomb_chars();
+
+    for i in 1..=char_map.len() {
+        println!("{:<2} {}", i, char_map.get(&i).unwrap());
+    }
+
+    println!();
+    println!("Enter the four characters on consecutive lines: ");
+
+    let mut bomb_chars = String::new();
+
+    for _i in 0..4 {
+        let mut input = String::new();
+        match io::stdin().read_line(&mut input) {
+            Ok(_) => (),
+            Err(_) => return
+        }
+
+        let char_index;
+        match input.trim().parse::<usize>() {
+            Ok(x) if char_map.contains_key(&(x as usize)) => { char_index = x; },
+            _ => return,
+        };
+
+        match char_map.get(&char_index) {
+            Some(x) => bomb_chars.push(*x),
+            _ => return
+        }
+    }
+
+    println!();
+
+    let mut combinations = get_char_combos();
+
+    for bomb_char in bomb_chars.chars() {
+        let mut current_combo = 0;
+        for combination in combinations.clone() {
+            if !combination.contains(bomb_char) {
+                combinations.remove(current_combo);
+            } else {
+                current_combo += 1;
+            }
+        }
+
+        if combinations.len() == 1 {
+            break;
+        }
+    }
+
+    let Some(correct_combination) = combinations.get(0) else { return };
+
+    println!("Results: ");
+    let mut char_added = 0;
+    for i in 0..bomb_chars.chars().count() {
+        let mut lowest_char_pos = correct_combination.len();
+        let mut lowest_char = ' ';
+
+        for bomb_char in bomb_chars.chars() {
+            let position = correct_combination.find(bomb_char).unwrap();
+
+            if (position > char_added || i == 0) && position < lowest_char_pos {
+                lowest_char_pos = position;
+                lowest_char = bomb_char;
+            }
+        }
+
+        char_added = lowest_char_pos;
+        println!("{} ", lowest_char);
+    }
+
+    println!();
+}
+
+fn get_bomb_chars() -> HashMap<usize, char> {
+    let mut chars = HashMap::new();
+
+    chars.insert(1, 'ټ');
+    chars.insert(2, 'Ω');
+    chars.insert(3, 'æ');
+    chars.insert(4, '©');
+    chars.insert(5, 'Ӭ');
+    chars.insert(6, 'Ҩ');
+    chars.insert(7, 'Ҋ');
+    chars.insert(8, 'ϗ');
+    chars.insert(9, 'ϰ');
+    chars.insert(10, 'Ԇ');
+    chars.insert(11, 'Ϙ');
+    chars.insert(12, 'Ѯ');
+    chars.insert(13, 'ƛ');
+    chars.insert(14, 'Ω');
+    chars.insert(15, '¶');
+    chars.insert(16, 'ψ');
+    chars.insert(17, '¿');
+    chars.insert(18, 'Ϭ');
+    chars.insert(19, 'Ͼ');
+    chars.insert(20, 'Ͽ');
+    chars.insert(21, '★');
+    chars.insert(22, '☆');
+    chars.insert(23, '҂');
+    chars.insert(24, 'Ѣ');
+    chars.insert(25, 'Ѭ');
+    chars.insert(26, 'Ѧ');
+    chars.insert(27, 'Җ');
+    chars.insert(28, 'Ѽ');
+
+    chars
+}
+
+fn get_char_combos() -> Vec<String> {
+    let mut combinations = Vec::new();
+    combinations.push("ϘѦƛϰѬϗϿ".to_owned());
+    combinations.push("ӬϘϿҨ☆ϗ¿".to_owned());
+    combinations.push("©ѼҨҖԆƛ☆".to_owned());
+    combinations.push("Ϭ¶ѢѬҖ¿ټ".to_owned());
+    combinations.push("ψټѢϾ¶Ѯ★".to_owned());
+    combinations.push("ϬӬ҂æψҊΩ".to_owned());
+
+    combinations
 }
