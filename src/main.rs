@@ -9,9 +9,10 @@ fn main() {
         println!("1: Wires");
         println!("2: Button");
         println!("3: Keypad");
-        println!("4: Memory");
-        println!("5: Complicated Wires");
-        println!("6: Password");
+        println!("4: Simon Says");
+        println!("5: Memory");
+        println!("6: Complicated Wires");
+        println!("7: Password");
         println!();
         let Ok(_) = io::stdin().read_line(&mut input) else { return };
 
@@ -21,9 +22,10 @@ fn main() {
             "1" => process_wires(),
             "2" => process_button(),
             "3" => process_keypad(),
-            "4" => process_memory(),
-            "5" => process_complicated_wires(),
-            "6" => process_password(),
+            "4" => process_simon_says(),
+            "5" => process_memory(),
+            "6" => process_complicated_wires(),
+            "7" => process_password(),
             _ => {
                 println!("Invalid entry");
                 println!();
@@ -649,4 +651,96 @@ fn get_char_combos() -> Vec<String> {
     combinations.push("ϬӬ҂æψҊΩ".to_owned());
 
     combinations
+}
+
+fn process_simon_says() {
+    let mut answer = String::new();
+    
+    println!("Does the serial number have a vowel? (y/n)");
+    let Ok(_) = io::stdin().read_line(&mut answer) else { return };
+    println!();
+    let vowel = answer.trim().to_lowercase() == "y";
+
+    answer = String::new();
+
+    println!("How many strikes are there?");
+    let Ok(_) = io::stdin().read_line(&mut answer) else { return };
+    println!();
+
+    let mut strikes;
+    match answer.trim().parse::<usize>() {
+        Ok(num) => strikes = num,
+        _ => { return },
+    }
+
+    let mut new_char = String::new();
+    let mut sequence = String::new();
+    println!("How color is flashing? (b/r/g/y)");
+
+    loop {
+        let Ok(_) = io::stdin().read_line(&mut new_char) else { return };
+
+        match &(new_char.trim().to_lowercase())[..] {
+            "m" => strikes += 1,
+            "b" | "r" | "g" | "y" => sequence.push_str(&(new_char.trim().to_lowercase())[..]),
+            _ => { break; },
+        }
+
+        if strikes > 2 {
+            break;
+        }
+
+        print_sequence(&sequence[..], strikes, vowel);
+
+        println!("Enter the new color (b/r/g/y), 'm' for mistake, or blank for finished:");
+        new_char = String::new();
+    }
+
+    println!();
+}
+
+fn print_sequence(sequence: &str, strikes: usize, vowel: bool) {
+    println!();
+    let mut mapping: HashMap<char, &str> = HashMap::new();
+
+    match (vowel, strikes) {
+        (true, 0) => {
+            mapping.insert('r', "Blue");
+            mapping.insert('b', "Red");
+            mapping.insert('g', "Yellow");
+            mapping.insert('y', "Green");
+        }, 
+        (true, 1) | (false, 2) => {
+            mapping.insert('r', "Yellow");
+            mapping.insert('b', "Green");
+            mapping.insert('g', "Blue");
+            mapping.insert('y', "Red");
+        }, 
+        (true, 2) => {
+            mapping.insert('r', "Green");
+            mapping.insert('b', "Red");
+            mapping.insert('g', "Yellow");
+            mapping.insert('y', "Blue");
+        }, 
+        (false, 0) => {
+            mapping.insert('r', "Blue");
+            mapping.insert('b', "Yellow");
+            mapping.insert('g', "Green");
+            mapping.insert('y', "Red");
+        }, 
+        (false, 1) => {
+            mapping.insert('r', "Red");
+            mapping.insert('b', "Blue");
+            mapping.insert('g', "Yellow");
+            mapping.insert('y', "Green");
+        },
+        _ => { return }
+    }
+
+    for ch in sequence.to_lowercase().chars() {
+        let Some(color) = mapping.get(&ch) else {return };
+        println!("{}", color);
+    }
+
+    println!();
 }
