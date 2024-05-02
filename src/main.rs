@@ -10,9 +10,10 @@ fn main() {
         println!("2: Button");
         println!("3: Keypad");
         println!("4: Simon Says");
-        println!("5: Memory");
-        println!("6: Complicated Wires");
-        println!("7: Password");
+        println!("5: Who's On First");
+        println!("6: Memory");
+        println!("7: Complicated Wires");
+        println!("8: Password");
         println!();
         let Ok(_) = io::stdin().read_line(&mut input) else { return };
 
@@ -23,9 +24,10 @@ fn main() {
             "2" => process_button(),
             "3" => process_keypad(),
             "4" => process_simon_says(),
-            "5" => process_memory(),
-            "6" => process_complicated_wires(),
-            "7" => process_password(),
+            "5" => process_whos_on_first(),
+            "6" => process_memory(),
+            "7" => process_complicated_wires(),
+            "8" => process_password(),
             _ => {
                 println!("Invalid entry");
                 println!();
@@ -743,4 +745,66 @@ fn print_sequence(sequence: &str, strikes: usize, vowel: bool) {
     }
 
     println!();
+}
+
+fn process_whos_on_first() {
+    loop {
+        let mut display = String::new();
+
+        println!("Enter the word in the display:");
+        let Ok(_) = io::stdin().read_line(&mut display) else { return };
+
+        println!();
+
+        match display.trim().to_uppercase().as_str() {
+            "UR" => println!("Top Left"),
+            "FIRST" | "OKAY" | "C" => println!("Top Right"),
+            "YES" | "NOTHING" | "LED" | "THEY ARE" => println!("Middle Left"),
+            "BLANK" | "READ" | "RED" | "YOU" | "YOUR" | "YOU'RE" | "YOURE" | "THEIR" => println!("Middle Right"),
+            "" | "REED" | "LEED" | "THEY'RE" | "THEYRE" => println!("Bottom Left"),
+            "DISPLAY" | "SAYS" | "NO" | "LEAD" | "HOLD ON" | "YOU ARE" | "THERE" | "SEE" | "CEE" => println!("Bottom Right"),
+            _ => return,
+        }
+
+        println!();
+
+        let mut button = String::new();
+
+        println!("Enter the word on the button or blank to exit:");
+        let Ok(_) = io::stdin().read_line(&mut button) else { return };
+
+        match button.trim().to_uppercase().as_str() {
+            "READY" => println!("YES, OKAY, WHAT, MIDDLE, LEFT, PRESS, RIGHT, BLANK, READY"),
+            "FIRST" => println!("LEFT, OKAY, YES, MIDDLE, NO, RIGHT, NOTHING, UHHH, WAIT, READY, BLANK, WHAT, PRESS, FIRST"),
+            "NO" => println!("BLANK, UHHH, WAIT, FIRST, WHAT, READY, RIGHT, YES, NOTHING, LEFT, PRESS, OKAY, NO"),
+            "BLANK" => println!("WAIT, RIGHT, OKAY, MIDDLE, BLANK"),
+            "NOTHING" => println!("UHHH, RIGHT, OKAY, MIDDLE, YES, BLANK, NO, PRESS, LEFT, WAHT, WAIT, FIRST, NOTHING"),
+            "YES" => println!("OKAY, RIGHT, UHHH, MIDDLE, FIRST, WHAT, PRESS, READY, NOTHING, YES"),
+            "WHAT" => println!("UHHH, WHAT"),
+            "UHHH" => println!("READY, NOTHING, LEFT, WHAT, OKAY, YES, RIGHT, NO, PRESS BLANK, UHHH"),
+            "LEFT" => println!("RIGHT, LEFT"),
+            "RIGHT" => println!("NOTHING, READY, PRESS, NO, WAIT, WHAT, RIGHT"),
+            "MIDDLE" => println!("BLANK, READY, OKAY, WHAT, NOTHING, PRESS, NO, WAIT, LEFT, MIDDLE"),
+            "OKAY" => println!("MIDDLE, NO, FIRST, YES, UHHH, NOTHING, WAIT, OKAY"),
+            "WAIT" => println!("UHHH, NO, BLANK, OKAY, YES, LEFT, FIRST, PRESS, WHAT, WAIT"),
+            "PRESS" => println!("RIGHT, MIDDLE, YES, READY, PRESS"),
+            "YOU" => println!("SURE, YOU ARE, YOUR, YOU'RE, NEXT, UH HUH, UR, HOLD, WHAT?, YOU"),
+            "YOU ARE" => println!("YOUR, NEXT, LIKE, UH HUH, WHAT?, DONE, UH UH, HOLD, YOU, U, YOU'RE, SURE, UR, YOU ARE"),
+            "YOUR" => println!("UH UH, YOU ARE, UH HUH, YOUR"),
+            "YOU'RE" | "YOURE" => println!("YOU, YOU'RE"),
+            "UR" => println!("DONE, U, UR"),
+            "U" => println!("UH HUH, SURE, NEXT, WHAT?, YOU'RE, UR, UH UH, DONE, U"),
+            "UH HUH" => println!("UH HUH"),
+            "UH UH"  => println!("UR, U, YOU ARE, YOU'RE NEXT, UH UH"),
+            "WHAT?" => println!("YOU, HOLD, YOU'RE, YOUR, U, DONE, UH UH, LIKE, YOU ARE, UH HUH, UR, NEXT, WHAT?"),
+            "DONE" =>  println!("SURE, UH HUH, NEXT, WHAT?, YOUR, UR, YOU'RE, HOLD, LIKE, YOU, U, YOU ARE, UH UH, DONE"),
+            "NEXT" =>  println!("WHAT?, UH HUH, UH UH, YOUR, HOLD, SURE, NEXT"),
+            "HOLD" =>  println!("YOU ARE, U, DONE, UH UH, YOU, UR, SURE, WHAT?, YOU'RE, NEXT, HOLD"),
+            "SURE" =>  println!("YOU ARE, DONE, LIKE, YOU'RE, YOU, HOLD, UH HUH, UR, SURE"),
+            "LIKE" =>  println!("YOU'RE, NEXT, U, UR, HOLD, DONE, UH UH, WHAT?, UH HUH, YOU, LIKE"),
+            _ => break,
+        }
+
+        println!();
+    }
 }
